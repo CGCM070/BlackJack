@@ -11,8 +11,9 @@ public class Mesa {
     private static final String ANSI_RESET = "\u001B[0m";
 
     private final Mazo mazo;
-    private final Jugador jugador;
+    private Jugador jugador;
     private final Jugador dealer;
+    private double apuestaActual;
 
     // Clase interna para generar sonidos de 8 bits
     private static class SonidosRetro {
@@ -89,12 +90,28 @@ public class Mesa {
 
     public Mesa(String nombre) {
         this.mazo = new Mazo();
-        this.jugador = new Jugador("Player", 1000);
         this.dealer = new Jugador("Dealer", Double.POSITIVE_INFINITY);
+        this.apuestaActual = 1.0; // Apuesta mínima por defecto
     }
 
-    public void iniciarJuego() {
+    public void iniciarJuego(Jugador jugadorActual) {
+        this.jugador = jugadorActual;
         Scanner sc = new Scanner(System.in);
+        clearScreen();
+        mostrarTitulo();
+
+        // Configurar apuesta
+        configurarApuesta(sc);
+
+        // Verificar que el jugador pueda apostar
+        if (!jugador.puedeApostar(apuestaActual)) {
+            System.out.println(" No tienes suficiente dinero para apostar $" + String.format("%.2f", apuestaActual));
+            return;
+        }
+
+        // Realizar la apuesta
+        jugador.perderDinero(apuestaActual);
+
         clearScreen();
         mostrarTitulo();
 
@@ -215,7 +232,7 @@ public class Mesa {
 
         // Área del jugador
         System.out.print(ANSI_GREEN + "║  " + ANSI_RESET);
-        String jugadorText = "JUGADOR: (Puntos: " + jugador.getPuntos() + ")";
+        String jugadorText = jugador.getNombre().toUpperCase() + ": (Puntos: " + jugador.getPuntos() + ")";
         System.out.print(jugadorText);
         // Calcular espacios restantes para alinear el borde derecho
         int espaciosJugador = 98 - 2 - jugadorText.length(); // 98 es el ancho interno, 2 son los espacios iniciales
@@ -229,11 +246,18 @@ public class Mesa {
         // Mostrar cartas del jugador
         mostrarCartasEnLineaConMarco(jugador.getMano(), false);
 
-        // Marco inferior
+        // Marco inferior con información del jugador
+        String infoJugador = String.format("Player: %s | Dinero: $%.2f | Victorias: %d | Apuesta: $%.2f",
+                jugador.getNombre(), jugador.getDinero(), jugador.getVictorias(), apuestaActual);
+        int espaciosInfo = 98 - infoJugador.length();
+        int espacioIzqInfo = espaciosInfo / 2;
+        int espacioDerInfo = espaciosInfo - espacioIzqInfo;
+
         System.out.println(ANSI_GREEN + """
                 ║                                                                                                  ║
                 ╠══════════════════════════════════════════════════════════════════════════════════════════════════╣
-                ║                                       Player: César                                              ║
+                ║""" + " ".repeat(espacioIzqInfo) + infoJugador + " ".repeat(espacioDerInfo) + """
+                ║
                 ╚══════════════════════════════════════════════════════════════════════════════════════════════════╝"""
                 + ANSI_RESET);
     }
@@ -347,24 +371,88 @@ public class Mesa {
         int puntosDealer = dealer.getPuntos();
 
         System.out.println("\nPuntos finales:");
-        System.out.println("Jugador: " + puntosJugador);
+        System.out.println(jugador.getNombre() + ": " + puntosJugador);
         System.out.println("Dealer: " + puntosDealer);
+        System.out.println();
+
+        boolean jugadorGana = false;
+        boolean esEmpate = false;
 
         if (puntosJugador > 21) {
             SonidosRetro.sonidoDerrota();
-            System.out.println(ANSI_RED + "¡Dealer gana!" + ANSI_RESET);
+            System.out.println(ANSI_RED + "¡Te has pasado! Dealer gana." + ANSI_RESET);
+            System.out.println("Pierdes $" + String.format("%.2f", apuestaActual));
         } else if (puntosDealer > 21) {
             SonidosRetro.sonidoVictoria();
-            System.out.println(ANSI_GREEN + "¡Jugador gana!" + ANSI_RESET);
+            System.out.println(ANSI_GREEN + "¡Dealer se pasa! " + jugador.getNombre() + " gana!" + ANSI_RESET);
+            jugadorGana = true;
         } else if (puntosJugador > puntosDealer) {
             SonidosRetro.sonidoVictoria();
-            System.out.println(ANSI_GREEN + "¡Jugador gana!" + ANSI_RESET);
+            System.out.println(ANSI_GREEN + "¡" + jugador.getNombre() + " gana!" + ANSI_RESET);
+            jugadorGana = true;
         } else if (puntosDealer > puntosJugador) {
             SonidosRetro.sonidoDerrota();
             System.out.println(ANSI_RED + "¡Dealer gana!" + ANSI_RESET);
+            System.out.println("💸 Pierdes $" + String.format("%.2f", apuestaActual));
         } else {
             SonidosRetro.sonidoEmpate();
             System.out.println("¡Empate!");
+            esEmpate = true;
         }
+
+        // Manejar premios y estadísticas
+        if (jugadorGana) {
+            double premio = apuestaActual * 2; // Ganancia 1:1 + devolución de la apuesta
+            jugador.ganarDinero(premio);
+            jugador.incrementarVictorias();
+            System.out.println("Ganas $" + String.format("%.2f", premio));
+            System.out.println(" ¡Victoria #" + jugador.getVictorias() + "!");
+        } else if (esEmpate) {
+            // En empate, devolver la apuesta
+            jugador.ganarDinero(apuestaActual);
+            System.out.println(" Se devuelve tu apuesta de $" + String.format("%.2f", apuestaActual));
+        }
+
+        System.out.println();
+        System.out.println(" Dinero actual: $" + String.format("%.2f", jugador.getDinero()));
+        System.out.println(" Victorias totales: " + jugador.getVictorias());
+    }
+
+    private void configurarApuesta(Scanner sc) {
+        System.out.println(" Dinero disponible: $" + String.format("%.2f", jugador.getDinero()));
+        System.out.println(" Apuesta actual: $" + String.format("%.2f", apuestaActual));
+        System.out.println();
+        System.out.println("¿Deseas cambiar tu apuesta? (s/n) o Enter para continuar:");
+
+        String respuesta = sc.nextLine().trim();
+        if (respuesta.equalsIgnoreCase("s")) {
+            while (true) {
+                System.out.print("Ingresa tu nueva apuesta (min: $0.50, max: $"
+                        + String.format("%.2f", jugador.getDinero()) + "): $");
+                try {
+                    String input = sc.nextLine().trim();
+                    double nuevaApuesta = Double.parseDouble(input);
+
+                    if (nuevaApuesta < 0.50) {
+                        System.out.println(" La apuesta mínima es $0.50");
+                        continue;
+                    }
+
+                    if (nuevaApuesta > jugador.getDinero()) {
+                        System.out.println(" No tienes suficiente dinero para esa apuesta");
+                        continue;
+                    }
+
+                    apuestaActual = nuevaApuesta;
+                    System.out.println(" Apuesta establecida en $" + String.format("%.2f", apuestaActual));
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println(" Por favor ingresa un número válido");
+                }
+            }
+        }
+
+        System.out.println("\nPresiona Enter para comenzar la partida...");
+        sc.nextLine();
     }
 }

@@ -12,7 +12,8 @@ public class Jugador {
     public Jugador(String nombre, double dineroInicial) {
         this.nombre = nombre;
         this.mano = new ArrayList<>();
-
+        this.dinero = dineroInicial;
+        this.victorias = 0;
     }
 
     public void recibirCarta(Carta carta) {
@@ -23,7 +24,8 @@ public class Jugador {
         int suma = 0;
         int ases = 0;
         for (Carta carta : mano) {
-            if (carta.getValorNumerico() == 11) ases++;
+            if (carta.getValorNumerico() == 11)
+                ases++;
             suma += carta.getValorNumerico();
         }
         while (suma > 21 && ases > 0) {
@@ -39,5 +41,33 @@ public class Jugador {
 
     public List<Carta> getMano() {
         return new ArrayList<>(mano);
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public double getDinero() {
+        return dinero;
+    }
+
+    public int getVictorias() {
+        return victorias;
+    }
+
+    public void ganarDinero(double cantidad) {
+        this.dinero += cantidad;
+    }
+
+    public void perderDinero(double cantidad) {
+        this.dinero -= cantidad;
+    }
+
+    public void incrementarVictorias() {
+        this.victorias++;
+    }
+
+    public boolean puedeApostar(double cantidad) {
+        return dinero >= cantidad;
     }
 }
