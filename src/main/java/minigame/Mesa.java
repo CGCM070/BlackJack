@@ -2,6 +2,8 @@ package minigame;
 
 import java.util.List;
 import java.util.Scanner;
+import java.awt.Toolkit;
+import javax.sound.sampled.*;
 
 public class Mesa {
     private static final String ANSI_RED = "\u001B[31m";
@@ -11,6 +13,79 @@ public class Mesa {
     private final Mazo mazo;
     private final Jugador jugador;
     private final Jugador dealer;
+
+    // Clase interna para generar sonidos de 8 bits
+    private static class SonidosRetro {
+        // Generar un beep de 8 bits
+        public static void beepSimple() {
+            Toolkit.getDefaultToolkit().beep();
+        }
+
+        // Generar tono de victoria (ascendente)
+        public static void sonidoVictoria() {
+            try {
+                reproducirTono(440, 150); // A4
+                Thread.sleep(50);
+                reproducirTono(523, 150); // C5
+                Thread.sleep(50);
+                reproducirTono(659, 300); // E5
+            } catch (Exception e) {
+                beepSimple();
+            }
+        }
+
+        // Generar tono de derrota (descendente)
+        public static void sonidoDerrota() {
+            try {
+                reproducirTono(523, 150); // C5
+                Thread.sleep(50);
+                reproducirTono(440, 150); // A4
+                Thread.sleep(50);
+                reproducirTono(330, 300); // E4
+            } catch (Exception e) {
+                beepSimple();
+            }
+        }
+
+        // Sonido al repartir carta
+        public static void sonidoCarta() {
+            try {
+                reproducirTono(800, 100);
+            } catch (Exception e) {
+                beepSimple();
+            }
+        }
+
+        // Sonido de empate
+        public static void sonidoEmpate() {
+            try {
+                reproducirTono(440, 200);
+                Thread.sleep(100);
+                reproducirTono(440, 200);
+            } catch (Exception e) {
+                beepSimple();
+            }
+        }
+
+        // Método para reproducir un tono específico
+        private static void reproducirTono(double frecuencia, int duracion) throws Exception {
+            AudioFormat format = new AudioFormat(22050, 8, 1, true, false);
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+            SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(format);
+            line.start();
+
+            byte[] buffer = new byte[22050 * duracion / 1000];
+            for (int i = 0; i < buffer.length; i++) {
+                double tiempo = i / 22050.0;
+                buffer[i] = (byte) (Math.sin(2 * Math.PI * frecuencia * tiempo) * 127);
+            }
+
+            line.write(buffer, 0, buffer.length);
+            line.drain();
+            line.close();
+        }
+    }
 
     public Mesa(String nombre) {
         this.mazo = new Mazo();
@@ -29,7 +104,18 @@ public class Mesa {
         // Repartir cartas iniciales
         for (int i = 0; i < 2; i++) {
             jugador.recibirCarta(mazo.sacarCarta());
+            SonidosRetro.sonidoCarta(); // Sonido al repartir carta
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+            }
+
             dealer.recibirCarta(mazo.sacarCarta());
+            SonidosRetro.sonidoCarta(); // Sonido al repartir carta
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+            }
         }
 
         mostrarMesa(true);
@@ -182,11 +268,13 @@ public class Mesa {
                 break;
 
             jugador.recibirCarta(mazo.sacarCarta());
+            SonidosRetro.sonidoCarta(); // Sonido al recibir carta
             clearScreen();
             mostrarTitulo();
             mostrarMesa(true);
 
             if (jugador.getPuntos() > 21) {
+                SonidosRetro.sonidoDerrota(); // Sonido de derrota por pasarse
                 System.out.println(ANSI_RED + "¡Te has pasado! " + jugador.getPuntos() + ANSI_RESET);
                 return;
             }
@@ -200,6 +288,7 @@ public class Mesa {
 
         while (dealer.getPuntos() < 17) {
             dealer.recibirCarta(mazo.sacarCarta());
+            SonidosRetro.sonidoCarta(); // Sonido al dealer recibir carta
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -220,14 +309,19 @@ public class Mesa {
         System.out.println("Dealer: " + puntosDealer);
 
         if (puntosJugador > 21) {
+            SonidosRetro.sonidoDerrota();
             System.out.println(ANSI_RED + "¡Dealer gana!" + ANSI_RESET);
         } else if (puntosDealer > 21) {
+            SonidosRetro.sonidoVictoria();
             System.out.println(ANSI_GREEN + "¡Jugador gana!" + ANSI_RESET);
         } else if (puntosJugador > puntosDealer) {
+            SonidosRetro.sonidoVictoria();
             System.out.println(ANSI_GREEN + "¡Jugador gana!" + ANSI_RESET);
         } else if (puntosDealer > puntosJugador) {
+            SonidosRetro.sonidoDerrota();
             System.out.println(ANSI_RED + "¡Dealer gana!" + ANSI_RESET);
         } else {
+            SonidosRetro.sonidoEmpate();
             System.out.println("¡Empate!");
         }
     }
