@@ -1,13 +1,13 @@
 # 🃏 BlackJack Retro v2.0.0
 
-Un juego de BlackJack retro complet### Interfaz Vi### Sistema Económico:
-- Dine### Problema### Problemas Técnicos:
+Un juego de BlackJack retro completo Interfaz Visual y Sistema Económico:
+- Problemas Técnicos:
 - **Java no encontrado**: Verifica que Java esté en tu PATH.
 - **Error de memoria**: Asegúrate de tener suficiente RAM disponible.
 - **Juego no responde**: Reinicia el terminal y vuelve a ejecutar.suales:
 - **Símbolos no se ven correctamente**: Asegúrate de que tu terminal soporte UTF-8.
 - **Colores no aparecen**: Algunos terminales antiguos pueden no soportar colores ANSI.
-- **Mesa desalineada**: Usa un terminal con fuente monospace (Consolas, Courier New).nicial de $10.00.
+- **Mesa desalineada**: Usa un terminal con fuente monospace (Consolas, Courier New)
 - Apuestas configurables (mínimo $0.50, máximo tu dinero disponible).
 - Contador de victorias persistente durante la sesión.
 - Ganancias 1:1 (apostar $5 = ganar $10 total).
