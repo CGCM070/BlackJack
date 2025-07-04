@@ -101,24 +101,52 @@ public class Mesa {
         jugador.limpiarMano();
         dealer.limpiarMano();
 
-        // Repartir cartas iniciales
-        for (int i = 0; i < 2; i++) {
-            jugador.recibirCarta(mazo.sacarCarta());
-            SonidosRetro.sonidoCarta(); // Sonido al repartir carta
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-            }
+        // Repartir cartas iniciales con animación
+        mostrarMesa(true); // Mostrar mesa inicial vacía
 
-            dealer.recibirCarta(mazo.sacarCarta());
-            SonidosRetro.sonidoCarta(); // Sonido al repartir carta
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-            }
+        // Repartir primera carta al jugador
+        jugador.recibirCarta(mazo.sacarCarta());
+        SonidosRetro.sonidoCarta();
+        clearScreen();
+        mostrarTitulo();
+        mostrarMesa(true);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
         }
 
+        // Repartir primera carta al dealer (visible)
+        dealer.recibirCarta(mazo.sacarCarta());
+        SonidosRetro.sonidoCarta();
+        clearScreen();
+        mostrarTitulo();
         mostrarMesa(true);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
+
+        // Repartir segunda carta al jugador
+        jugador.recibirCarta(mazo.sacarCarta());
+        SonidosRetro.sonidoCarta();
+        clearScreen();
+        mostrarTitulo();
+        mostrarMesa(true);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
+
+        // Repartir segunda carta al dealer (oculta)
+        dealer.recibirCarta(mazo.sacarCarta());
+        SonidosRetro.sonidoCarta();
+        clearScreen();
+        mostrarTitulo();
+        mostrarMesa(true); // La segunda carta del dealer aparece oculta
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
         jugarTurnoJugador(sc);
         jugarTurnoDealer();
         determinarGanador();
@@ -163,7 +191,14 @@ public class Mesa {
                 + ANSI_RESET);
 
         // Mostrar cartas del dealer
-        if (ocultarSegundaCarta) {
+        if (dealer.getMano().isEmpty()) {
+            // Si el dealer no tiene cartas, mostrar área vacía
+            for (int linea = 0; linea < 7; linea++) {
+                System.out.println(ANSI_GREEN
+                        + "║                                                                                                  ║"
+                        + ANSI_RESET);
+            }
+        } else if (ocultarSegundaCarta && dealer.getMano().size() > 1) {
             mostrarCartasEnLineaConMarco(List.of(dealer.getMano().get(0)), true);
         } else {
             mostrarCartasEnLineaConMarco(dealer.getMano(), false);
@@ -204,8 +239,15 @@ public class Mesa {
     }
 
     private void mostrarCartasEnLineaConMarco(List<Carta> cartas, boolean ocultarSegunda) {
-        if (cartas.isEmpty())
+        if (cartas.isEmpty()) {
+            // Mostrar líneas vacías si no hay cartas
+            for (int linea = 0; linea < 7; linea++) {
+                System.out.println(ANSI_GREEN
+                        + "║                                                                                                  ║"
+                        + ANSI_RESET);
+            }
             return;
+        }
 
         String[][] representaciones = new String[cartas.size()][7];
 
