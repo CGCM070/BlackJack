@@ -8,7 +8,6 @@ public class Mesa {
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_RESET = "\u001B[0m";
 
-
     private final Mazo mazo;
     private final Jugador jugador;
     private final Jugador dealer;
@@ -46,77 +45,141 @@ public class Mesa {
 
     private void mostrarTitulo() {
         System.out.println(ANSI_GREEN + """
-				╔══════════════════════════════════════════╗
-				║             BLACKJACK RETRO              ║
-				║             César Castillo               ║
-				╚══════════════════════════════════════════╝
-				""" + ANSI_RESET);
+                ╔══════════════════════════════════════════════════════════════════════════════════════════════════╗
+                ║                                      BLACKJACK RETRO                                             ║
+                ║                                      César Castillo                                              ║
+                ╚══════════════════════════════════════════════════════════════════════════════════════════════════╝
+                                """ + ANSI_RESET);
     }
-
 
     private void mostrarMesa(boolean ocultarSegundaCarta) {
-        System.out.println("\nDealer: ");
-        List<Carta> manoDealer = dealer.getMano();
+        // Marco superior - Mesa muy ancha (100 caracteres)
+        System.out.println(ANSI_GREEN + """
+                ╔══════════════════════════════════════════════════════════════════════════════════════════════════╗
+                ║                                      MESA DE BLACKJACK                                           ║
+                ╠══════════════════════════════════════════════════════════════════════════════════════════════════╣"""
+                + ANSI_RESET);
 
+        // Área del dealer
+        System.out.print(ANSI_GREEN + "║  " + ANSI_RESET);
+        System.out.print("DEALER: ");
+        if (!ocultarSegundaCarta) {
+            System.out.print("(Puntos: " + dealer.getPuntos() + ")");
+        }
+        // Calcular espacios restantes para alinear el borde derecho
+        String dealerText = "DEALER: " + (ocultarSegundaCarta ? "" : "(Puntos: " + dealer.getPuntos() + ")");
+        int espaciosDealer = 98 - 2 - dealerText.length(); // 98 es el ancho interno, 2 son los espacios iniciales
+        System.out.print(" ".repeat(espaciosDealer));
+        System.out.println(ANSI_GREEN + "║" + ANSI_RESET);
+
+        System.out.println(ANSI_GREEN
+                + "║                                                                                                  ║"
+                + ANSI_RESET);
+
+        // Mostrar cartas del dealer
         if (ocultarSegundaCarta) {
-            mostrarCartasEnLinea(List.of(manoDealer.get(0)));
-
-            // carta oculta
-            System.out.println("""
-					┌─────────┐ ┌─────────┐
-					│ ## XX ##│ │## XX ## │
-					│         │ │         │
-					│    ?    │ │    ?    │
-					│         │ │         │
-					│## XX ## │ │## XX ## │
-					└─────────┘ └─────────┘
-					""");
+            mostrarCartasEnLineaConMarco(List.of(dealer.getMano().get(0)), true);
         } else {
-            mostrarCartasEnLinea(manoDealer);
+            mostrarCartasEnLineaConMarco(dealer.getMano(), false);
         }
 
-        System.out.println("\nJugador: (Puntos: " + jugador.getPuntos() + ")");
-        mostrarCartasEnLinea(jugador.getMano());
+        // Separador central
+        System.out.println(ANSI_GREEN + """
+                ║                                                                                                  ║
+                ╠══════════════════════════════════════════════════════════════════════════════════════════════════╣
+                ║                                         CENTRO                                                   ║
+                ╠══════════════════════════════════════════════════════════════════════════════════════════════════╣
+                ║                                                                                                  ║"""
+                + ANSI_RESET);
+
+        // Área del jugador
+        System.out.print(ANSI_GREEN + "║  " + ANSI_RESET);
+        String jugadorText = "JUGADOR: (Puntos: " + jugador.getPuntos() + ")";
+        System.out.print(jugadorText);
+        // Calcular espacios restantes para alinear el borde derecho
+        int espaciosJugador = 98 - 2 - jugadorText.length(); // 98 es el ancho interno, 2 son los espacios iniciales
+        System.out.print(" ".repeat(espaciosJugador));
+        System.out.println(ANSI_GREEN + "║" + ANSI_RESET);
+
+        System.out.println(ANSI_GREEN
+                + "║                                                                                                  ║"
+                + ANSI_RESET);
+
+        // Mostrar cartas del jugador
+        mostrarCartasEnLineaConMarco(jugador.getMano(), false);
+
+        // Marco inferior
+        System.out.println(ANSI_GREEN + """
+                ║                                                                                                  ║
+                ╠══════════════════════════════════════════════════════════════════════════════════════════════════╣
+                ║                                       Player: César                                              ║
+                ╚══════════════════════════════════════════════════════════════════════════════════════════════════╝"""
+                + ANSI_RESET);
     }
 
+    private void mostrarCartasEnLineaConMarco(List<Carta> cartas, boolean ocultarSegunda) {
+        if (cartas.isEmpty())
+            return;
 
-    private void mostrarCartasEnLinea(List<Carta> cartas) {
-        String[][] representaciones = new String[cartas.size()][6];
+        String[][] representaciones = new String[cartas.size()][7];
 
         for (int i = 0; i < cartas.size(); i++) {
-            Carta carta = cartas.get(i);
-            String color = carta.getPalo().equals("♥") || carta.getPalo().equals("♦") ? ANSI_RED : "";
-            String reset = ANSI_RESET;
+            if (i == 1 && ocultarSegunda) {
+                representaciones[i][0] = "┌─────────┐";
+                representaciones[i][1] = "│ ## XX ##│";
+                representaciones[i][2] = "│         │";
+                representaciones[i][3] = "│    ?    │";
+                representaciones[i][4] = "│         │";
+                representaciones[i][5] = "│## XX ## │";
+                representaciones[i][6] = "└─────────┘";
+            } else {
+                Carta carta = cartas.get(i);
+                String color = carta.getPalo().equals("♥") || carta.getPalo().equals("♦") ? ANSI_RED : "";
+                String reset = ANSI_RESET;
 
-            String valor = carta.getValor();
-            String palo = carta.getPalo();
+                String valor = carta.getValor();
+                String palo = carta.getPalo();
 
-            representaciones[i][0] = color + "┌─────────┐" + reset;
-            representaciones[i][1] = color + "│ %-2s      │".formatted(valor) + reset;
-            representaciones[i][2] = color + "│         │" + reset;
-            representaciones[i][3] = color + "│    %s    │".formatted(palo) + reset;
-            representaciones[i][4] = color + "│         │" + reset;
-            representaciones[i][5] = color + "│      %-2s │".formatted(valor) + reset;
-
-        }
-
-        for (int linea = 0; linea < 6; linea++) {
-            for (String[] carta : representaciones) {
-                System.out.print(carta[linea] + " ");
+                representaciones[i][0] = color + "┌─────────┐" + reset;
+                representaciones[i][1] = color + "│ %-2s      │".formatted(valor) + reset;
+                representaciones[i][2] = color + "│         │" + reset;
+                representaciones[i][3] = color + "│    %s    │".formatted(palo) + reset;
+                representaciones[i][4] = color + "│         │" + reset;
+                representaciones[i][5] = color + "│      %-2s │".formatted(valor) + reset;
+                representaciones[i][6] = color + "└─────────┘" + reset;
             }
-            System.out.println();
         }
 
-        for (int i = 0; i < cartas.size(); i++) {
-            System.out.print("└─────────┘ ");
+        // Calcular espacios para centrar las cartas en la mesa muy ancha
+        int anchoCartas = cartas.size() * 11 + (cartas.size() - 1) * 2; // 11 por carta + 2 espacios entre cartas
+        int anchoTotalMesa = 98; // Ancho total interno exacto de la mesa (100 - 2 para los bordes ║)
+        int espacioRestante = anchoTotalMesa - anchoCartas;
+        int espacioIzquierdo = espacioRestante / 2;
+        int espacioDerecho = espacioRestante - espacioIzquierdo;
+
+        // Imprimir las cartas línea por línea
+        for (int linea = 0; linea < 7; linea++) {
+            System.out.print(ANSI_GREEN + "║" + ANSI_RESET);
+            System.out.print(" ".repeat(espacioIzquierdo));
+
+            for (int i = 0; i < representaciones.length; i++) {
+                System.out.print(representaciones[i][linea]);
+                if (i < representaciones.length - 1) {
+                    System.out.print("  ");
+                }
+            }
+
+            // Rellenar con espacios hasta completar el ancho exacto
+            System.out.print(" ".repeat(espacioDerecho));
+            System.out.println(ANSI_GREEN + "║" + ANSI_RESET);
         }
-        System.out.println();
     }
 
     private void jugarTurnoJugador(Scanner sc) {
         while (jugador.getPuntos() < 21) {
             System.out.println("\n¿Desea otra carta? (s/n)");
-            if (!sc.nextLine().equalsIgnoreCase("s")) break;
+            if (!sc.nextLine().equalsIgnoreCase("s"))
+                break;
 
             jugador.recibirCarta(mazo.sacarCarta());
             clearScreen();
