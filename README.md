@@ -1,4 +1,4 @@
-# 🃏 BlackJack Retro v2.0.0
+# 🃏 BlackJack Retro 
 
 Un juego de BlackJack retro completo Interfaz Visual y Sistema Económico:
 - Problemas Técnicos:
