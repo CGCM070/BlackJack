@@ -113,57 +113,7 @@ La imagen muestra una partida real con:
 - **Información**: Dinero disponible, victorias y apuesta actual
 - **Colores**: Cartas rojas (♥♦) y negras (♠♣) diferenciadas
 
-## 🛠️ Solución de Problemas
 
-### 🎨 Problemas Visuales:
-- ❌ **Símbolos no se ven correctamente**: Asegúrate de que tu terminal soporte UTF-8.
-- 🎨 **Colores no aparecen**: Algunos terminales antiguos pueden no soportar colores ANSI.
-- � **Mesa desalineada**: Usa un terminal con fuente monospace (Consolas, Courier New).
-
-### Problemas de Audio:
-- **Sin sonidos**: Verifica que tu sistema tenga audio habilitado.
-- **Sonidos distorsionados**: Algunos sistemas pueden tener limitaciones con javax.sound.
-
-### ⚙️ Problemas Técnicos:
-- �🚫 **Java no encontrado**: Verifica que Java esté en tu PATH.
-- 💾 **Error de memoria**: Asegúrate de tener suficiente RAM disponible.
-- 🔄 **Juego no responde**: Reinicia el terminal y vuelve a ejecutar.
-
-### Consejos de Optimización:
-- **Mejor experiencia**: Usa terminal en pantalla completa.
-- **Rendimiento**: Cierra aplicaciones innecesarias para mejor audio.
-- **Compatibilidad**: Windows Terminal y terminales modernos funcionan mejor.
-
----
-
-## 🚀 Novedades v2.0.0
-
-### Nuevas Funcionalidades:
-- **Personalización del jugador**: Ingresa tu nombre (máximo 10 caracteres).
-- **Sistema de apuestas completo**: Apuesta desde $0.50 hasta todo tu dinero.
-- **Contador de victorias**: Rastrea tus logros durante la sesión.
-- **Gestión de dinero**: Comienza con $10 y administra tu bankroll.
-
-### Mejoras de Audio:
-- **Sonidos de 8 bits**: Tonos retro para cada acción del juego.
-- **Efectos sincronizados**: Audio perfectamente coordinado con animaciones.
-- **Melodías específicas**: Diferentes tonos para victoria, derrota y empate.
-
-### Mejoras Visuales:
-- **Mesa más ancha**: 100 caracteres de ancho perfectamente alineados.
-- **Información en tiempo real**: Dinero, victorias y apuesta siempre visibles.
-- **Animaciones mejoradas**: Reparto secuencial de cartas con pausas.
-- **Centrado perfecto**: Todos los elementos alineados automáticamente.
-
-### Mejoras de Jugabilidad:
-- **Validaciones inteligentes**: Verificación automática de fondos.
-- **Configuración dinámica**: Cambia tu apuesta antes de cada partida.
-- **Prevención de bancarrota**: El juego termina elegantemente sin dinero.
-- **Estadísticas finales**: Resumen completo al finalizar.
-
----
-
-## 🤝 Contribuciones
 
 ¡Las mejoras son bienvenidas!  
 Siéntete libre de abrir *issues* o *pull requests* en el repositorio.
